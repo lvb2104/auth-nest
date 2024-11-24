@@ -4,9 +4,17 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { CoffinsModule } from './coffins/coffins.module';
 import { IamModule } from './iam/iam.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-    imports: [UsersModule, CoffinsModule, IamModule],
+    imports: [
+        ConfigModule.forRoot({
+            isGlobal: true,
+        }),
+        UsersModule,
+        CoffinsModule,
+        IamModule,
+    ],
     controllers: [AppController],
     providers: [AppService],
 })
