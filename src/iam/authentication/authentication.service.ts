@@ -13,6 +13,7 @@ import { User } from '../../users/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import jwtConfig from '../config/jwt.config';
 import { ConfigType } from '@nestjs/config';
+import { ActiveUserData } from '../interfaces/active-user-data.interface';
 
 @Injectable()
 export class AuthenticationService {
@@ -67,7 +68,7 @@ export class AuthenticationService {
             {
                 sub: user.id, // consistent with jwt-standards
                 email: user.email, // optional naming
-            },
+            } as ActiveUserData,
             // jwt-configuration
             {
                 secret: this.jwtConfiguration.secret,
