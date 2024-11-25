@@ -7,19 +7,25 @@ import { JwtModule } from '@nestjs/jwt';
 import jwtConfig from './config/jwt.config';
 import { DatabaseModule } from '../database/database.module';
 import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
+import { AccessTokenGuard } from './authentication/guards/access-token.guard';
 
 @Module({
     imports: [
-        DatabaseModule,
         JwtModule.registerAsync(jwtConfig.asProvider()),
-        // use partial registration
+        DatabaseModule,
         ConfigModule.forFeature(jwtConfig),
+        // use partial registration
     ],
     providers: [
         {
             provide: HashingService,
             // can be BcryptService or any other service that implements HashingService
             useClass: BcryptService,
+        },
+        {
+            provide: APP_GUARD,
+            useClass: AccessTokenGuard,
         },
         AuthenticationService,
     ],

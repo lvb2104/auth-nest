@@ -20,6 +20,8 @@ export class AuthenticationService {
         private readonly databaseService: DatabaseService,
         private readonly hashingService: HashingService,
         private readonly jwtService: JwtService,
+
+        // inject jwtConfig
         @Inject(jwtConfig.KEY)
         private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
     ) {}
@@ -59,24 +61,24 @@ export class AuthenticationService {
             throw new UnauthorizedException('Password does not match');
         }
 
-        // call signAsync method to generate a new jwt-access token
+        // generate a new jwt
         const accessToken = await this.jwtService.signAsync(
             // payload
             {
-                sub: user.id, // remain consistent with jwt-standards
-                email: user.email, // optional
+                sub: user.id, // consistent with jwt-standards
+                email: user.email, // optional naming
             },
             // jwt-configuration
             {
-                secret: `${this.jwtConfiguration.secret}`,
-                audience: `${this.jwtConfiguration.audience}`,
-                issuer: `${this.jwtConfiguration.issuer}`,
-                expiresIn: `${this.jwtConfiguration.accessTokenTtl}`,
+                secret: this.jwtConfiguration.secret,
+                audience: this.jwtConfiguration.audience,
+                issuer: this.jwtConfiguration.issuer,
+                expiresIn: this.jwtConfiguration.accessTokenTtl,
             },
         );
 
         return {
             accessToken,
-        }
+        };
     }
 }

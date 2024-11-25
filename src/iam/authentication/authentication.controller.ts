@@ -1,15 +1,7 @@
-import {
-    Body,
-    Controller,
-    HttpCode,
-    HttpStatus,
-    Post,
-    Res,
-} from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import { SignUpDto } from './dto/sign-up.dto';
 import { SignInDto } from './dto/sign-in.dto';
-import { Response } from 'express';
 
 @Controller('authentication')
 export class AuthenticationController {
@@ -26,17 +18,18 @@ export class AuthenticationController {
     @HttpCode(HttpStatus.OK)
     @Post('sign-in')
     async signIn(
-        @Res({ passthrough: true }) response: Response,
+        // @Res({ passthrough: true }) response: Response,
         @Body() signInDto: SignInDto,
     ) {
         const accessToken = await this.authenticationService.signIn(signInDto);
-        response.cookie('accessToken', accessToken, {
-            // secure means that the cookie will only be sent over HTTPS connections (recommended in production)
-            secure: true,
-            // httpOnly means that the cookie cannot be accessed by client-side scripts (recommended)
-            httpOnly: true,
-            // sameSite means that the cookie will only be sent in a first-party context (recommended)
-            sameSite: true,
-        });
+        return accessToken;
+        // response.cookie('accessToken', accessToken, {
+        // secure means that the cookie will only be sent over HTTPS connections (recommended in production)
+        // secure: true,
+        // httpOnly means that the cookie cannot be accessed by client-side scripts (recommended)
+        // httpOnly: true,
+        // sameSite means that the cookie will only be sent in a first-party context (recommended)
+        // sameSite: true,
+        // });
     }
 }
