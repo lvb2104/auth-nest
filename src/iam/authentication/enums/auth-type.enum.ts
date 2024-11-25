@@ -1,4 +1,4 @@
 export enum AuthType {
-    Bearer,
-    None,
+    Bearer, // default strategy
+    None, // skip authentication
 }

@@ -2,7 +2,10 @@ import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import { SignUpDto } from './dto/sign-up.dto';
 import { SignInDto } from './dto/sign-in.dto';
+import { Auth } from './decorators/auth.decorator';
+import { AuthType } from './enums/auth-type.enum';
 
+@Auth(AuthType.None)
 @Controller('authentication')
 export class AuthenticationController {
     constructor(
@@ -17,12 +20,11 @@ export class AuthenticationController {
     // using 200 OK status code instead of 201 Created status code (default for POST)
     @HttpCode(HttpStatus.OK)
     @Post('sign-in')
-    async signIn(
+    signIn(
         // @Res({ passthrough: true }) response: Response,
         @Body() signInDto: SignInDto,
     ) {
-        const accessToken = await this.authenticationService.signIn(signInDto);
-        return accessToken;
+        return this.authenticationService.signIn(signInDto);
         // response.cookie('accessToken', accessToken, {
         // secure means that the cookie will only be sent over HTTPS connections (recommended in production)
         // secure: true,

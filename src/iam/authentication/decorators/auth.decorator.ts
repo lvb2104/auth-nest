@@ -1,9 +1,10 @@
 import { SetMetadata } from '@nestjs/common';
 import { AuthType } from '../enums/auth-type.enum';
 
+// metadata key
 export const AUTH_TYPE_KEY = 'authType';
 
-// use SetMetadata to define custom decorator for specific route handler
+// decorator factory function that adds metadata to the handler (method) or the class (controller) with the specified auth types (default is Bearer) to be used by the authentication guard to determine the authentication strategy to use for the handler (method) or the class (controller)
 export const Auth = (...authTypes: AuthType[]) => {
-    SetMetadata(AUTH_TYPE_KEY, authTypes);
+    return SetMetadata(AUTH_TYPE_KEY, authTypes);
 };
