@@ -4,6 +4,7 @@ import { SignUpDto } from './dto/sign-up.dto';
 import { SignInDto } from './dto/sign-in.dto';
 import { Auth } from './decorators/auth.decorator';
 import { AuthType } from './enums/auth-type.enum';
+import { RefreshToken } from './dto/refresh-token.dto';
 
 @Auth(AuthType.None)
 @Controller('authentication')
@@ -33,5 +34,11 @@ export class AuthenticationController {
         // sameSite means that the cookie will only be sent in a first-party context (recommended)
         // sameSite: true,
         // });
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Post('refresh-tokens')
+    refreshTokens(@Body() refreshToken: RefreshToken) {
+        return this.authenticationService.refreshTokens(refreshToken);
     }
 }

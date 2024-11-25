@@ -14,6 +14,7 @@ import { JwtService } from '@nestjs/jwt';
 import jwtConfig from '../config/jwt.config';
 import { ConfigType } from '@nestjs/config';
 import { ActiveUserData } from '../interfaces/active-user-data.interface';
+import { RefreshToken } from './dto/refresh-token.dto';
 
 @Injectable()
 export class AuthenticationService {
@@ -62,24 +63,67 @@ export class AuthenticationService {
             throw new UnauthorizedException('Password does not match');
         }
 
+        // generate tokens after verifying the user's credentials
+        return await this.generateTokens(user);
+    }
+
+    async generateTokens(user: User) {
+        // use Promise.all to enhance performance
+        const [accessToken, refreshToken] = await Promise.all([
+            this.signToken<Partial<ActiveUserData>>(
+                user.id,
+                this.jwtConfiguration.accessTokenTtl,
+                { email: user.email },
+            ),
+            this.signToken(user.id, this.jwtConfiguration.refreshTokenTtl, {
+                email: user.email,
+            }),
+        ]);
+
+        // send the tokens back to the client
+        return {
+            accessToken,
+            refreshToken,
+        };
+    }
+
+    async refreshTokens(refreshToken: RefreshToken) {
+        // exception user does not exist or invalid refresh token
+        try {
+            // verify the refresh token and get the sub (userId) from it to generate a new access token and refresh token
+            const { sub } = await this.jwtService.verifyAsync<
+                Pick<ActiveUserData, 'sub'>
+            >(refreshToken.refreshToken, this.jwtConfiguration);
+            const user = await this.databaseService.user.findUniqueOrThrow({
+                where: {
+                    id: sub,
+                },
+            });
+
+            // re-generate tokens after verifying the refresh token
+            return await this.generateTokens(user);
+        } catch {
+            throw new UnauthorizedException();
+        }
+    }
+
+    // refactor signToken to use for both accessToken and refreshToken
+    private async signToken<T>(userId: number, expiresIn: number, payload: T) {
         // generate a new jwt
-        const accessToken = await this.jwtService.signAsync(
+        return await this.jwtService.signAsync(
             // payload
             {
-                sub: user.id, // consistent with jwt-standards
-                email: user.email, // optional naming
-            } as ActiveUserData,
+                // use userId to identify the user in the token, remain consistent with jwt-standards
+                sub: userId,
+                ...payload,
+            },
             // jwt-configuration
             {
                 secret: this.jwtConfiguration.secret,
                 audience: this.jwtConfiguration.audience,
                 issuer: this.jwtConfiguration.issuer,
-                expiresIn: this.jwtConfiguration.accessTokenTtl,
+                expiresIn,
             },
         );
-
-        return {
-            accessToken,
-        };
     }
 }
