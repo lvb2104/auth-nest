@@ -6,6 +6,7 @@ import { CoffinsModule } from './coffins/coffins.module';
 import { IamModule } from './iam/iam.module';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
+import { RedisModule } from './cache/redis.module';
 import * as Joi from '@hapi/joi';
 
 @Module({
@@ -25,6 +26,7 @@ import * as Joi from '@hapi/joi';
         UsersModule,
         CoffinsModule,
         IamModule,
+        RedisModule,
     ],
     controllers: [AppController],
     providers: [AppService],

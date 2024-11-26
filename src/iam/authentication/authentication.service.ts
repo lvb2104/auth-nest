@@ -15,6 +15,9 @@ import jwtConfig from '../config/jwt.config';
 import { ConfigType } from '@nestjs/config';
 import { ActiveUserData } from '../interfaces/active-user-data.interface';
 import { RefreshToken } from './dto/refresh-token.dto';
+import { RedisService } from '../../cache/redis.service';
+import { randomUUID } from 'crypto';
+import { InvalidatedRefreshTokenError } from '../../common/errors/invalidated-refresh-token-error.error';
 
 @Injectable()
 export class AuthenticationService {
@@ -26,6 +29,8 @@ export class AuthenticationService {
         // inject jwtConfig
         @Inject(jwtConfig.KEY)
         private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
+
+        private readonly redisService: RedisService,
     ) {}
 
     async signUp(signUpDto: SignUpDto) {
@@ -67,44 +72,72 @@ export class AuthenticationService {
         return await this.generateTokens(user);
     }
 
-    async generateTokens(user: User) {
-        // use Promise.all to enhance performance
-        const [accessToken, refreshToken] = await Promise.all([
-            this.signToken<Partial<ActiveUserData>>(
-                user.id,
-                this.jwtConfiguration.accessTokenTtl,
-                { email: user.email },
-            ),
-            this.signToken(user.id, this.jwtConfiguration.refreshTokenTtl, {
-                email: user.email,
-            }),
-        ]);
-
-        // send the tokens back to the client
-        return {
-            accessToken,
-            refreshToken,
-        };
-    }
-
     async refreshTokens(refreshToken: RefreshToken) {
-        // exception user does not exist or invalid refresh token
         try {
-            // verify the refresh token and get the sub (userId) from it to generate a new access token and refresh token
-            const { sub } = await this.jwtService.verifyAsync<
-                Pick<ActiveUserData, 'sub'>
+            // verify the refresh token and get the sub (userId) and refreshTokenId from it to verify in cache and generate a new access token and refresh token
+            const { sub, refreshTokenId } = await this.jwtService.verifyAsync<
+                Pick<ActiveUserData, 'sub'> & { refreshTokenId: string }
             >(refreshToken.refreshToken, this.jwtConfiguration);
+
+            // find the user by userId (sub) to generate new tokens
             const user = await this.databaseService.user.findUniqueOrThrow({
                 where: {
                     id: sub,
                 },
             });
 
+            // refresh token rotation: check validation of former refresh token
+            const isValid = await this.redisService.validate(
+                user.id,
+                refreshTokenId,
+            );
+
+            // revoke former refresh token
+            if (isValid) {
+                await this.redisService.invalidate(user.id);
+            } else {
+                throw new Error('Refresh token is invalid');
+            }
+
             // re-generate tokens after verifying the refresh token
             return await this.generateTokens(user);
-        } catch {
+        } catch (err) {
+            if (err instanceof InvalidatedRefreshTokenError) {
+                // reuse detection
+                throw new UnauthorizedException('Access denied');
+            }
             throw new UnauthorizedException();
         }
+    }
+
+    async generateTokens(user: User) {
+        // generate a random refresh token id to identify the refresh token in the cache
+        const refreshTokenId = randomUUID();
+
+        // use Promise.all to enhance performance
+        const [accessToken, refreshToken] = await Promise.all([
+            // access token
+            this.signToken<Partial<ActiveUserData>>(
+                user.id,
+                this.jwtConfiguration.accessTokenTtl,
+                { email: user.email },
+            ),
+            // refresh token
+            this.signToken<Partial<ActiveUserData>>(
+                user.id,
+                this.jwtConfiguration.refreshTokenTtl,
+                { refreshTokenId },
+            ),
+        ]);
+
+        // insert the refresh token id into the cache
+        await this.redisService.insert(user.id, refreshTokenId);
+
+        // send the tokens back to the client
+        return {
+            accessToken,
+            refreshToken,
+        };
     }
 
     // refactor signToken to use for both accessToken and refreshToken

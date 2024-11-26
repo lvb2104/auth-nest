@@ -10,6 +10,7 @@ import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthenticationGuard } from './authentication/guards/authentication.guard';
 import { AccessTokenGuard } from './authentication/guards/access-token.guard';
+import { RedisService } from '../cache/redis.service';
 
 @Module({
     imports: [
@@ -30,6 +31,7 @@ import { AccessTokenGuard } from './authentication/guards/access-token.guard';
         },
         AuthenticationService,
         AccessTokenGuard,
+        RedisService,
     ],
     controllers: [AuthenticationController],
 })

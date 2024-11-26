@@ -6,6 +6,7 @@ import { Auth } from './decorators/auth.decorator';
 import { AuthType } from './enums/auth-type.enum';
 import { RefreshToken } from './dto/refresh-token.dto';
 
+// set metadata for skipping authentication
 @Auth(AuthType.None)
 @Controller('authentication')
 export class AuthenticationController {
