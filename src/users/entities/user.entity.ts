@@ -1,8 +1,9 @@
-import { $Enums, Prisma } from '@prisma/client';
+import { Permission, Role } from '@prisma/client';
 
-export class User implements Prisma.UserCreateInput {
+export class User {
     id: number;
     email: string;
     password: string;
-    role?: $Enums.Role;
+    role?: Role;
+    permissions?: Permission[];
 }

@@ -25,7 +25,7 @@ export class AccessTokenGuard implements CanActivate {
         const request = context.switchToHttp().getRequest();
         const token = this.extractTokenFromHeader(request);
         if (!token) {
-            throw new ForbiddenException('Custom Forbidden')
+            throw new ForbiddenException('Custom Forbidden');
         }
 
         try {

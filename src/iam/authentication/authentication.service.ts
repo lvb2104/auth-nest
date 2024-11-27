@@ -14,7 +14,7 @@ import { JwtService } from '@nestjs/jwt';
 import jwtConfig from '../config/jwt.config';
 import { ConfigType } from '@nestjs/config';
 import { ActiveUserData } from '../interfaces/active-user-data.interface';
-import { RefreshToken } from './dto/refresh-token.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RedisService } from '../../cache/redis.service';
 import { randomUUID } from 'crypto';
 import { InvalidatedRefreshTokenError } from '../../common/errors/invalidated-refresh-token-error.error';
@@ -35,10 +35,11 @@ export class AuthenticationService {
 
     async signUp(signUpDto: SignUpDto) {
         try {
-            const user = new User();
-            user.email = signUpDto.email;
-            user.password = await this.hashingService.hash(signUpDto.password);
-            await this.databaseService.user.create({ data: user });
+            const userCreateInput: Prisma.UserCreateInput = {
+                email: signUpDto.email,
+                password: await this.hashingService.hash(signUpDto.password),
+            };
+            await this.databaseService.user.create({ data: userCreateInput });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === 'P2002') {
@@ -72,7 +73,7 @@ export class AuthenticationService {
         return await this.generateTokens(user);
     }
 
-    async refreshTokens(refreshToken: RefreshToken) {
+    async refreshTokens(refreshToken: RefreshTokenDto) {
         try {
             // verify the refresh token and get the sub (userId) and refreshTokenId from it to verify in cache and generate a new access token and refresh token
             const { sub, refreshTokenId } = await this.jwtService.verifyAsync<
@@ -120,7 +121,11 @@ export class AuthenticationService {
             this.signToken<Partial<ActiveUserData>>(
                 user.id,
                 this.jwtConfiguration.accessTokenTtl,
-                { email: user.email, role: user.role },
+                {
+                    email: user.email,
+                    role: user.role,
+                    permissions: user.permissions,
+                },
             ),
             // refresh token
             this.signToken<Partial<ActiveUserData>>(

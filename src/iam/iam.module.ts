@@ -12,6 +12,7 @@ import { AuthenticationGuard } from './authentication/guards/authentication.guar
 import { AccessTokenGuard } from './authentication/guards/access-token.guard';
 import { RedisService } from '../cache/redis.service';
 import { RolesGuard } from './authorization/guards/roles.guard';
+import { PermissionsGuard } from './authorization/guards/permissions.guard';
 
 @Module({
     imports: [
@@ -30,9 +31,13 @@ import { RolesGuard } from './authorization/guards/roles.guard';
             provide: APP_GUARD,
             useClass: AuthenticationGuard,
         },
+        // {
+        //     provide: APP_GUARD,
+        //     useClass: RolesGuard,
+        // },
         {
             provide: APP_GUARD,
-            useClass: RolesGuard,
+            useClass: PermissionsGuard,
         },
         AuthenticationService,
         AccessTokenGuard,
