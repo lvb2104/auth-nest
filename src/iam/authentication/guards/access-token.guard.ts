@@ -1,9 +1,9 @@
 import {
     CanActivate,
     ExecutionContext,
+    ForbiddenException,
     Inject,
     Injectable,
-    UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import jwtConfig from '../../config/jwt.config';
@@ -23,10 +23,9 @@ export class AccessTokenGuard implements CanActivate {
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest();
-        console.log(request);
         const token = this.extractTokenFromHeader(request);
         if (!token) {
-            throw new UnauthorizedException();
+            throw new ForbiddenException('Custom Forbidden')
         }
 
         try {
@@ -39,7 +38,7 @@ export class AccessTokenGuard implements CanActivate {
             // so that we can access it in our route handlers
             request[REQUEST_USER_KEY] = payload;
         } catch {
-            throw new UnauthorizedException();
+            throw new ForbiddenException('Custom Forbidden');
         }
         return true;
     }

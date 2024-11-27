@@ -26,7 +26,7 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
-![[./public/imgs/how_jwt_works_without_hashing_and_caching.png]]
+![How JWT Works Without Hashing and Caching](./public/imgs/how_jwt_works_without_hashing_and_caching.png)
 
 ## Project setup
 

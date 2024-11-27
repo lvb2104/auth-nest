@@ -106,7 +106,7 @@ export class AuthenticationService {
                 // reuse detection
                 throw new UnauthorizedException('Access denied');
             }
-            throw new UnauthorizedException();
+            throw new UnauthorizedException('Custom Authorized');
         }
     }
 
@@ -120,7 +120,7 @@ export class AuthenticationService {
             this.signToken<Partial<ActiveUserData>>(
                 user.id,
                 this.jwtConfiguration.accessTokenTtl,
-                { email: user.email },
+                { email: user.email, role: user.role },
             ),
             // refresh token
             this.signToken<Partial<ActiveUserData>>(

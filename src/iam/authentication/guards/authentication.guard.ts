@@ -44,7 +44,7 @@ export class AuthenticationGuard implements CanActivate {
             .map((type) => this.authTypeGuardMap[type])
             .flat();
 
-        let error = new UnauthorizedException();
+        let error = new UnauthorizedException('Custom Unauthorized');
 
         // loop through all guards to check if any of them can activate
         for (const guardObject of guardObjects) {
