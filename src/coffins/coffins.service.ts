@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { CreateCoffinDto } from './dto/create-coffin.dto';
-import { UpdateCoffinDto } from './dto/update-coffin.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class CoffinsService {
-    create(createCoffinDto: CreateCoffinDto) {
+    create(createCoffinDto: Prisma.CoffinCreateInput) {
         return 'This action adds a new coffin';
     }
 
@@ -16,7 +15,7 @@ export class CoffinsService {
         return `This action returns a #${id} coffin`;
     }
 
-    update(id: number, updateCoffinDto: UpdateCoffinDto) {
+    update(id: number, updateCoffinDto: Prisma.CoffinUpdateInput) {
         return `This action updates a #${id} coffin`;
     }
 

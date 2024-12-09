@@ -97,7 +97,9 @@ export class AuthenticationService {
             if (isValid) {
                 await this.redisService.invalidate(user.id);
             } else {
-                throw new Error('Refresh token is invalid');
+                throw new Error(
+                    'Refresh token is invalid (AuthenticationService)',
+                );
             }
 
             // re-generate tokens after verifying the refresh token
@@ -105,9 +107,13 @@ export class AuthenticationService {
         } catch (err) {
             if (err instanceof InvalidatedRefreshTokenError) {
                 // reuse detection
-                throw new UnauthorizedException('Access denied');
+                throw new UnauthorizedException(
+                    'Access denied from AuthenticationService',
+                );
             }
-            throw new UnauthorizedException('Custom Authorized');
+            throw new UnauthorizedException(
+                'Custom Authorized from AuthenticationService',
+            );
         }
     }
 

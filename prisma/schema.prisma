@@ -5,32 +5,47 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
-    // uncomment next line if you use Prisma <5.10
-    // directUrl = env("DATABASE_URL_UNPOOLED")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // uncomment next line if you use Prisma <5.10
+  // directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
 model User {
-    id       Int    @id @default(autoincrement())
-    email    String @unique
-    password String
-    role     Role   @default(Regular)
-    // doesn't make sense, don't use both role and permissions
-    permissions Permission[] @default([])
+  id          Int          @id @default(autoincrement())
+  email       String       @unique
+  password    String
+  role        Role         @default(Regular)
+  // doesn't make sense, don't use both role and permissions
+  permissions Permission[] @default([])
+  apikeys     ApiKey[]
+}
+
+model ApiKey {
+  id     Int    @id @default(autoincrement())
+  key    String @unique
+  uuid   String @unique
+  userid Int
+  user   User   @relation(fields: [userid], references: [id])
+}
+
+model Coffin {
+  id          Int    @id @default(autoincrement())
+  name        String
+  description String
 }
 
 enum Role {
-    Regular
-    Admin
+  Regular
+  Admin
 }
 
 enum Permission {
-    CreateCoffin
-    UpdateCoffin
-    DeleteCoffin
+  CreateCoffin
+  UpdateCoffin
+  DeleteCoffin
 }
