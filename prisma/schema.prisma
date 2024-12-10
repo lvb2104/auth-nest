@@ -18,10 +18,11 @@ datasource db {
 model User {
   id          Int          @id @default(autoincrement())
   email       String       @unique
-  password    String
+  password    String?
   role        Role         @default(Regular)
   // doesn't make sense, don't use both role and permissions
   permissions Permission[] @default([])
+  googleId    String?
   apikeys     ApiKey[]
 }
 

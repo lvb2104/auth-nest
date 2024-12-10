@@ -15,6 +15,8 @@ import { PermissionsGuard } from './authorization/guards/permissions.guard';
 import { ApiKeysService } from './authentication/api-keys.service';
 import { ApiKeyGuard } from './authentication/guards/api-key.guard';
 import { RolesGuard } from './authorization/guards/roles.guard';
+import { GoogleAuthenticationService } from './authentication/social/google-authentication.service';
+import { GoogleAuthenticationController } from './authentication/social/google-authentication.controller';
 
 @Module({
     imports: [
@@ -29,11 +31,12 @@ import { RolesGuard } from './authorization/guards/roles.guard';
             // can be BcryptService or any other service that implements HashingService
             useClass: BcryptService,
         },
-        // guards
+        // apply authentication guard containing 3 types
         {
             provide: APP_GUARD,
             useClass: AuthenticationGuard,
         },
+        // apply 2 types of authorization
         {
             provide: APP_GUARD,
             useClass: RolesGuard,
@@ -42,16 +45,18 @@ import { RolesGuard } from './authorization/guards/roles.guard';
             provide: APP_GUARD,
             useClass: PermissionsGuard,
         },
-        {
-            provide: APP_GUARD,
-            useClass: ApiKeyGuard,
-        },
+        // don't duplicate this guard for the whole controller
+        // {
+        //     provide: APP_GUARD,
+        //     useClass: ApiKeyGuard,
+        // },
         AuthenticationService,
         AccessTokenGuard,
         ApiKeyGuard,
         RedisService,
         ApiKeysService,
+        GoogleAuthenticationService,
     ],
-    controllers: [AuthenticationController],
+    controllers: [AuthenticationController, GoogleAuthenticationController],
 })
 export class IamModule {}

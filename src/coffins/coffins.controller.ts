@@ -16,6 +16,7 @@ import { Permissions } from '../iam/authorization/decorators/permission.decorato
 import { Auth } from '../iam/authentication/decorators/auth.decorator';
 import { AuthType } from '../iam/authentication/enums/auth-type.enum';
 
+// apply 2 types to authenticate that are access token and api key
 @Auth(AuthType.Bearer, AuthType.ApiKey)
 @Controller('coffins')
 export class CoffinsController {

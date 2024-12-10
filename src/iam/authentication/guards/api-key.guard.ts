@@ -19,7 +19,7 @@ export class ApiKeyGuard implements CanActivate {
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest();
-        const bufferedApiKey = this.extractApiKeyFromHeader(request);
+        const bufferedApiKey = this.extractBufferedApiKeyFromHeader(request);
         if (!bufferedApiKey) {
             throw new UnauthorizedException(
                 'Unauthorized from ApiKeyGuard at extractApiKeyFromHeader()',
@@ -49,7 +49,9 @@ export class ApiKeyGuard implements CanActivate {
     }
 
     // apiKey here is the base64 encoded string that contains the id and the randomUUID value
-    private extractApiKeyFromHeader(request: Request): string | undefined {
+    private extractBufferedApiKeyFromHeader(
+        request: Request,
+    ): string | undefined {
         const [type, bufferedApiKey] =
             request.headers.authorization?.split(' ') ?? [];
         return type === 'ApiKey' ? bufferedApiKey : undefined;
