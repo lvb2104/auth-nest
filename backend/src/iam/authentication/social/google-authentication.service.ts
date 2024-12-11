@@ -27,7 +27,7 @@ export class GoogleAuthenticationService implements OnModuleInit {
         this.oauthClient = new OAuth2Client(clientId, clientSecret);
     }
 
-    // token is issued by Google
+    // token is the token received from Google OAuth service after successful authentication with Google account (e.g. Google Sign-In) by the client application (e.g. frontend) using Google Sign-In SDK (e.g. Google Sign-In for Websites)
     async authenticate(token: string) {
         try {
             // verify the token with Google

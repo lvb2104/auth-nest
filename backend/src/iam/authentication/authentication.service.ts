@@ -18,6 +18,7 @@ import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RedisService } from '../../cache/redis.service';
 import { randomUUID } from 'crypto';
 import { InvalidatedRefreshTokenError } from '../../common/errors/invalidated-refresh-token-error.error';
+import { OtpAuthenticationService } from './otp-authentication.service';
 
 @Injectable()
 export class AuthenticationService {
@@ -25,6 +26,7 @@ export class AuthenticationService {
         private readonly databaseService: DatabaseService,
         private readonly hashingService: HashingService,
         private readonly jwtService: JwtService,
+        private readonly otpAuthenticationService: OtpAuthenticationService,
 
         // inject jwtConfig
         @Inject(jwtConfig.KEY)
@@ -67,6 +69,17 @@ export class AuthenticationService {
 
         if (!isMatch) {
             throw new UnauthorizedException('Password does not match');
+        }
+
+        if (user.isTfaEnabled) {
+            const isValid = this.otpAuthenticationService.verifyCode(
+                signInDto.tfaCode,
+                user.tfaSecret,
+            );
+
+            if (!isValid) {
+                throw new UnauthorizedException('InValid 2FA code');
+            }
         }
 
         // generate tokens after verifying the user's credentials

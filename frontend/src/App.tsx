@@ -5,7 +5,7 @@ import {
     GoogleLoginResponseOffline,
 } from 'react-google-login';
 import axios from 'axios';
-import {gapi} from 'gapi-script'
+import { gapi } from 'gapi-script';
 
 const App: React.FC = () => {
     const [isGapiReady, setIsGapiReady] = useState(false);

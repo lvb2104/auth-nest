@@ -1,3 +1,4 @@
+import { Optional } from '@nestjs/common';
 import { IsEmail, MinLength } from 'class-validator';
 
 export class SignInDto {
@@ -6,4 +7,7 @@ export class SignInDto {
 
     @MinLength(8)
     password: string;
+
+    @Optional()
+    tfaCode: string;
 }
